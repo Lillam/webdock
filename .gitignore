@@ -1,6 +1,12 @@
-composer.phar
-/vendor/
+# Ignore all the websites that the factory might have made for you; or just generally any website that resides within
+# the ./websites/ directory (the home of all your websites for this environment)
+websites/*
+!websites/index.php
 
-# Commit your application's lock file https://getcomposer.org/doc/01-basic-usage.md#commit-your-composer-lock-file-to-version-control
-# You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
-# composer.lock
+# Ignore all the configurations that the factory might have made for you; or just generally any configuration other than
+# the default that has been provided for example.
+server/sites-enabled/*
+!server/sites-enabled/default.conf
+
+database/*
+!database/my.cnf

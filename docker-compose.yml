@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  # The serve in which the tech stack will be running on. (Nginx)
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: server
+    ports:
+      - "80:80"
+    networks:
+      - internal
+    volumes:
+      - ./server/sites-enabled:/etc/nginx/conf.d
+      - ./websites:/var/www/html
+    depends_on:
+      - php
+      - database
+
+  # The language of choice that this server will be predominantly using.
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: php
+    ports:
+      - "9000:9000"
+    networks:
+      - internal
+    volumes:
+      - ./websites:/var/www/html
+
+  database:
+    image: mysql:5.7.22
+    container_name: database
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    networks:
+      - internal
+    volumes:
+      - ./database/data:/var/lib/mysql
+      - ./database/my.cnf:/etc/mysql/my.cnf #[my.cnf] -> Configure the mysql database right here.
+#      - ./database/mysqld:/var/run/mysqld
+
+# The networks that the application will be utilising in order to talk to one another.
+networks:
+  internal:
+    driver: bridge
