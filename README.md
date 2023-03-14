@@ -8,7 +8,7 @@ set within ./websites
 
 You can run the following to begin getting setup with new projects: 
 ```
-./factory create website
+./factory.sh create website
 ```
 
 which will generate a file in the following: 

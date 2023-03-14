@@ -22,11 +22,10 @@
 
 action=$1;
 website=$2;
-
-host=127.0.0.1
+host=127.0.0.1;
 
 if [ -z "$action" ] || [ -z "$website" ]; then
-    echo "action or website hasn't been provided"
+    echo "action or website hasn't been provided";
     exit;
 fi
 
@@ -71,7 +70,7 @@ handle_print_to_conf () {
 # Utility method for handling updating the hosts file of the system, which would need to point localhost to the name of
 # the website that we've just created. so the developer would then be able to navigate to website.extension on their
 # system.
-handle_hosts() {
+create_handle_hosts() {
     echo $host ${website}.test www.${website}.test \# from factory >> /etc/hosts;
 
     echo "Step 1: /etc/hosts has been updated to accommodate $website onto $host";
@@ -81,7 +80,7 @@ handle_hosts() {
 # the sites enabled within the server... at the current moment of development this would strictly be for a php/html based
 # implementation devoid of proxies for frontend application development. however that might be something to consider when
 # running this application -> appending some boilerplate proxy reverses for a frontend stack instead.
-handle_configuration() {
+create_handle_configuration() {
     if [ ! -f "./server/sites-enabled/$website.conf" ]; then
         echo -e "$server" >> ./server/sites-enabled/${website}.conf
     fi
@@ -95,7 +94,7 @@ handle_configuration() {
 # be there.
 # This particular method is also going to want to check whether there has been a symbolic link made for the particular
 # website also.
-handle_website_creation() {
+create_handle_website_creation() {
     if [ ! -d "./websites/$website" ]; then
         mkdir "./websites/$website";
     fi
@@ -109,10 +108,16 @@ handle_website_creation() {
     echo "step 3: $website has been generated within ./websites/$website/public/";
 }
 
-handle_hosts;
-handle_configuration;
-handle_website_creation;
+if [ "$action" == "create" ]; then
+    create_handle_hosts;
+    create_handle_configuration;
+    create_handle_website_creation;
+fi
 
-# when having run this command, we're going to run this to restart the necessary containers so that the above when
-# created will have been placed in their necessary locations,
-docker-compose restart
+if [ "$action" == "remove" ]; then
+
+fi
+
+# After all the above had been ran and the new website is ready to be worked on, we can then restart the nginx process
+# so that the new website can be immediately accessed without having to perform any rebuild.
+docker-compose exec server nginx -s reload

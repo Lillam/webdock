@@ -40,10 +40,11 @@ services:
       - "3306:3306"
     networks:
       - internal
+    environment:
+      MYSQL_ROOT_PASSWORD: root
     volumes:
       - ./database/data:/var/lib/mysql
-      - ./database/my.cnf:/etc/mysql/my.cnf #[my.cnf] -> Configure the mysql database right here.
-#      - ./database/mysqld:/var/run/mysqld
+      # - ./database/my.cnf:/etc/mysql/my.cnf #[my.cnf] -> Configure the mysql database right here.
 
 # The networks that the application will be utilising in order to talk to one another.
 networks:
