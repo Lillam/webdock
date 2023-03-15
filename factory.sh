@@ -42,10 +42,6 @@ if [ -z "$action" ] || [ -z "$website" ]; then
 fi
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Create Utilities...
-#-----------------------------------------------------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------------------------------------------------
 # Server Template...
 #
 # boiler plate content for the necessary website that's being created. This would be appended into
@@ -130,6 +126,10 @@ read -r -d '' web_index <<- EOL
     </body>
 </html>
 EOL
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Create Utilities...
+#-----------------------------------------------------------------------------------------------------------------------
 
 # Utility method for handling updating the hosts file of the system, which would need to point localhost to the name of
 # the website that we've just created. so the developer would then be able to navigate to website.extension on their
