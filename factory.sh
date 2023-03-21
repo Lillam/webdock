@@ -99,6 +99,14 @@ read -r -d '' web_index <<- EOL
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                font-family: ProximaNova,
+                             -apple-system,
+                             BlinkMacSystemFont,
+                             "Segoe UI",
+                             Roboto,
+                             "Helvetica Neue",
+                             Arial,
+                             sans-serif
             }
 
             body > div {
