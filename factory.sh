@@ -84,7 +84,7 @@ read -r -d '' web_index <<- EOL
 <!DOCTYPE html>
 <html lang="EN">
     <head>
-        <title>Default WebDock landing page...</title>
+        <title>$website</title>
         <style>
             html,
             html body {
@@ -134,17 +134,21 @@ EOL
 # Utility method for handling updating the hosts file of the system, which would need to point localhost to the name of
 # the website that we've just created. so the developer would then be able to navigate to website.extension on their
 # system.
-# todo -> this particular method wants to check the contents of the hosts file and see if the entry already exists as
-#         there wouldn't be much of a point in adding it again.
 handle_create_hosts() {
+    while IFS= read -r line; do
+        if [[ "$line" == *"$website"* ]]; then
+            echo "step 1: /etc/hosts already includes entry for $website moving on...";
+            return;
+        fi
+    done <<< $(cat "/etc/hosts");
     echo $host ${website}.test www.${website}.test \# from factory >> /etc/hosts;
     echo "step 1: /etc/hosts has been updated to accommodate $website onto $host";
 }
 
-# Utility method for handling the creation of the website's configuration file, which will be created and dropped within
-# the sites enabled within the server... at the current moment of development this would strictly be for a php/html based
-# implementation devoid of proxies for frontend application development. however that might be something to consider when
-# running this application -> appending some boilerplate proxy reverses for a frontend stack instead.
+# Utility method for handling the creation of the website's configuration file, which will be created and dropped
+# within the sites enabled within the server... at the current moment of development this would strictly be for a
+# php/html based implementation devoid of proxies for frontend application development. however that might be something
+# to consider when running this application -> appending some boilerplate proxy reverses for a frontend stack instead.
 handle_create_configuration() {
     if [ ! -f "./server/sites-enabled/$website.conf" ]; then
         echo -e "$server" >> "./server/sites-enabled/${website}.conf";
@@ -158,8 +162,8 @@ handle_create_configuration() {
 # to generate the necessary boiler plate for the website; this particular snippet is going to check if that particular
 # website already exists, so it doesn't get made twice, or doesn't happen to overwrite or append to what might already
 # be there.
-# This particular method is also going to want to check whether there has been a symbolic link made for the particular
-# website also.
+# todo - This particular method is also going to want to check whether there has been a symbolic link made for the
+#        particular website also.
 handle_create_website_creation() {
     if [ ! -d "./websites/$website" ]; then
         mkdir "./websites/$website";
@@ -177,6 +181,18 @@ handle_create_website_creation() {
 # Remove Utilities...
 #-----------------------------------------------------------------------------------------------------------------------
 
+# Utility method for the removal of the particular websites from the hosts file - this particular snippet would require
+# the use of sudo. find all examples of the passed parameter "www.website.test" which is absolute to what the website
+# would be called within the hosts file, which will limit the potential of having another similarly named website being
+# stripped from the hosts file...
+handle_remove_hosts() {
+    sed -i "/www.$website.test/d" "/etc/hosts"
+    echo "$website has been removed from the /etc/hosts; $website will no longer be accessible.";
+}
+
+# Utility method for the removal of the configuration files that reside within ./server/sites-enabled and contains the
+# website.conf. This would be needed in order for the removal of the particular configuration on the nginx server so
+# the page will no longer be available.
 handle_remove_website_config() {
     if [ -f "./server/sites-enabled/$website.conf" ]; then
         rm "./server/sites-enabled/$website.conf";
@@ -186,7 +202,8 @@ handle_remove_website_config() {
     echo "$website.conf does not exist within ./server/sites-enabled";
 }
 
-# Check to see whether there is a directory for the website that the user wants to remove.
+# Utility method which will remove the website from the ./websites directory, cleaning up the space that that particular
+# website might have taken up.
 handle_remove_website_directory() {
     if [ -d "./websites/$website" ]; then
         rm -r "./websites/$website";
@@ -211,6 +228,7 @@ fi
 # if passing the action as remove then the script is going to start running the necessary methods in order to tear down
 # the particular website that the developer will have passed.
 if [ "$action" == "remove" ]; then
+    handle_remove_hosts;
     handle_remove_website_config
     handle_remove_website_directory;
 fi

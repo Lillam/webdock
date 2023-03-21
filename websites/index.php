@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="EN">
     <head>
-        <title>Default WebDock landing page...</title>
+        <title>WebDock - Get Started</title>
         <style>
             html,
             html body {
