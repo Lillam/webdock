@@ -17,11 +17,6 @@
             }
 
             body {
-                height: 100vh;
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
                 font-family: ProximaNova,
                              -apple-system,
                              BlinkMacSystemFont,
@@ -32,7 +27,15 @@
                              sans-serif
             }
 
-            body > div {
+            .main {
+                height: 100vh;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .main > div {
                 text-align: center;
                 height: 100%;
                 padding: 40px;
@@ -82,24 +85,26 @@
         </style>
     </head>
     <body>
-        <div class="welcome flex">
-            <div>
-                <h1>Welcome to <span>W</span>eb<span>D</span>ock</h1>
-                <div class="flex">
-                    <p>Get started with running:</p>
-                    <div class="command">
-                        <p>./factory.sh <span>create</span> my-website</p>
+        <div class="main">
+            <div class="welcome flex">
+                <div>
+                    <h1>Welcome to <span>W</span>eb<span>D</span>ock</h1>
+                    <div class="flex">
+                        <p>Get started with running:</p>
+                        <div class="command">
+                            <p>./factory.sh <span>create</span> my-website</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="commands flex">
-            <div>
-                <div class="command">
-                    <p>./factory.sh <span>create</span> {website}</p>
-                </div>
-                <div class="command">
-                    <p>./factory.sh <span>remove</span> {website}</p>
+            <div class="commands flex">
+                <div>
+                    <div class="command">
+                        <p>./factory.sh <span>create</span> {website}</p>
+                    </div>
+                    <div class="command">
+                        <p>./factory.sh <span>remove</span> {website}</p>
+                    </div>
                 </div>
             </div>
         </div>

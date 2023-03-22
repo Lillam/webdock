@@ -10,3 +10,6 @@ server/sites-enabled/*
 
 database/*
 !database/my.cnf
+
+# Ignore all the IDE files.
+.idea
