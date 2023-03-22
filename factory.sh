@@ -5,7 +5,7 @@
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Intro to this particular script
-# This script is designed to make it easier for just setting up the necessary boiler plate stuff that each and every
+# This script is designed to make it easier for just setting up the necessary boilerplate stuff that each and every
 # website is going to need... rather than going to each individual location and adding the necessary configurations it
 # can be consolidated into this particular helper; which is going to take care of the following:
 # adding the host into the hosts /etc/hosts file
@@ -31,6 +31,8 @@
 action=$1;
 website=$2;
 user=$3;
+with=$4
+
 
 # the host in which when running the script (if creating one) that will be bound to, this *could* potentially be passed
 # as a parameter to make it easier for the script so that the user could run:
@@ -50,7 +52,7 @@ fi
 #-----------------------------------------------------------------------------------------------------------------------
 # Server Template...
 #
-# boiler plate content for the necessary website that's being created. This would be appended into
+# boilerplate content for the necessary website that's being created. This would be appended into
 # ./server/sites-enabled/*.conf; which will enable the developer to then start accessing the domain without having to
 # visit localhost
 #-----------------------------------------------------------------------------------------------------------------------
@@ -82,7 +84,7 @@ EOL
 #-----------------------------------------------------------------------------------------------------------------------
 # Website Template...
 #
-# Boiler plate for your website, this is just a basic html snippet appended into the index.php file which would then
+# Boilerplate for your website, this is just a basic html snippet appended into the index.php file which would then
 # allow the developer to begin working on the website with ease.
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -135,7 +137,7 @@ read -r -d '' web_index <<- EOL
     <body>
         <div>
             <h1>Welcome to <span>$website</span></h1>
-            <p>This is your boiler plate website, feel free to modify it as you see fit.</p>
+            <p>This is your boilerplate website, feel free to modify it as you see fit.</p>
         </div>
     </body>
 </html>
@@ -147,8 +149,6 @@ EOL
 # Boilerplate for the composer.json file that will be included with the project if the script has specified that this
 # is going to be wanted. if it is then this will be transferred across and composer install will be initiated from the
 # docker-compose exec php container.
-# todo -> This particular snippet will be dumped within the root of the project
-# todo -> docker-compose exec php ./$website composer install will want to be executed in order to get the packages.
 #-----------------------------------------------------------------------------------------------------------------------
 
 read -r -d '' composer <<- EOL
@@ -159,7 +159,7 @@ read -r -d '' composer <<- EOL
     "license": "mit",
     "autoload": {
         "psr-4": {
-            "${website^^}\\\\": "src/"
+            "${website^^}\\\\\\\\": "src/"
         }
     },
     "authors": [
@@ -204,7 +204,7 @@ handle_create_configuration() {
 }
 
 # Utility method for handling the creation of the website, when hitting this part; within the environment we are going
-# to generate the necessary boiler plate for the website; this particular snippet is going to check if that particular
+# to generate the necessary boilerplate for the website; this particular snippet is going to check if that particular
 # website already exists, so it doesn't get made twice, or doesn't happen to overwrite or append to what might already
 # be there.
 # todo - This particular method is also going to want to check whether there has been a symbolic link made for the
@@ -220,6 +220,22 @@ handle_create_website_creation() {
         echo -e "$web_index" >> "./websites/$website/public/index.php";
     fi
     echo "step 3: $website has been generated within ./websites/$website/public/";
+}
+
+# Utility method for handling the creation of the composer side, if the script had been executed with the composer being
+# included, then we're going to need to set up the necessary composer files and auto-loading directories. upon this
+# happening, we're then going to want to run the necessary container's directory composer install so that the files
+# will be generated and auto-loading will be in place from the minute the user opens the web page.
+handle_create_composer() {
+    if [[ "$with" == *"--with-composer"* ]]; then
+        if [ ! -d "./websites/$website/src" ]; then
+            mkdir "./websites/$website/src";
+        fi
+        echo -e "$composer" >> "./websites/$website/composer.json";
+        echo "step 3.1 composer.json has been added to ./websites/$website";
+        docker-compose run -w "/var/www/html/$website" php composer install;
+        echo "step 3.2 composer has finished installing project";
+    fi
 }
 
 # Utility for handling the permissions to set the user for the one that the person specifies for within the command...
@@ -245,7 +261,7 @@ handle_permissions() {
 # would be called within the hosts file, which will limit the potential of having another similarly named website being
 # stripped from the hosts file...
 handle_remove_hosts() {
-    sed -i "/www.$website.test/d" "/etc/hosts"
+    sed -i "/www.$website.test/d" "/etc/hosts";
     echo "$website has been removed from the /etc/hosts; $website will no longer be accessible.";
 }
 
@@ -282,6 +298,7 @@ if [ "$action" == "create" ]; then
     handle_create_hosts;
     handle_create_configuration;
     handle_create_website_creation;
+    handle_create_composer;
     handle_permissions;
 fi
 
