@@ -17,7 +17,7 @@ To set up a new project you can run the following: (*might need sudo*)
 which will generate the following:
 - ./server/sites-available/{website}.conf
 - ./websites/{website}/public/index.php
-- 127.0.0.1 {website].test www.{website}.test >>> /etc/hosts will be added.
+- `127.0.0.1 {website].test www.{website}.test` >>> /etc/hosts will be added.
 
 ---
 
@@ -30,4 +30,4 @@ or just simply want to remove it you can run the following: (*might need sudo*)
 which will remove the following:
 - ./server/sites-enabled/{website}.conf
 - ./websites/{website}/public/index.php
-- 127.0.0.1 {website}.test www.{website}.test >>> /etc/hosts will be removed.
+- `127.0.0.1 {website}.test www.{website}.test` >>> /etc/hosts will be removed.
