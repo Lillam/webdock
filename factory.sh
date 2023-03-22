@@ -30,6 +30,7 @@
 
 action=$1;
 website=$2;
+user=$3;
 
 # the host in which when running the script (if creating one) that will be bound to, this *could* potentially be passed
 # as a parameter to make it easier for the script so that the user could run:
@@ -38,6 +39,11 @@ host=127.0.0.1;
 
 if [ -z "$action" ] || [ -z "$website" ]; then
     echo "action or website hasn't been provided";
+    exit;
+fi
+
+if [ "$action" != "create" ] && [ "$action" != "remove" ]; then
+    echo "first passed parameter (action) wants to be [create|remove]";
     exit;
 fi
 
@@ -136,6 +142,37 @@ read -r -d '' web_index <<- EOL
 EOL
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Composer Template...
+#
+# Boilerplate for the composer.json file that will be included with the project if the script has specified that this
+# is going to be wanted. if it is then this will be transferred across and composer install will be initiated from the
+# docker-compose exec php container.
+# todo -> This particular snippet will be dumped within the root of the project
+# todo -> docker-compose exec php ./$website composer install will want to be executed in order to get the packages.
+#-----------------------------------------------------------------------------------------------------------------------
+
+read -r -d '' composer <<- EOL
+{
+    "name": "$website/$website",
+    "description": "$website made by the factory... fil in your at your own discretion",
+    "type": "project",
+    "license": "mit",
+    "autoload": {
+        "psr-4": {
+            "${website^^}\\\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "First Last",
+            "email": "first.last@provider.com"
+        }
+    ],
+    "require": {}
+}
+EOL
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Create Utilities...
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -149,7 +186,7 @@ handle_create_hosts() {
             return;
         fi
     done <<< $(cat "/etc/hosts");
-    echo $host ${website}.test www.${website}.test \# from factory >> /etc/hosts;
+    echo "$host ${website}.test www.${website}.test # -> from factory" >> /etc/hosts;
     echo "step 1: /etc/hosts has been updated to accommodate $website onto $host";
 }
 
@@ -183,6 +220,20 @@ handle_create_website_creation() {
         echo -e "$web_index" >> "./websites/$website/public/index.php";
     fi
     echo "step 3: $website has been generated within ./websites/$website/public/";
+}
+
+# Utility for handling the permissions to set the user for the one that the person specifies for within the command...
+# if the user passes one that is, if they do not this will bomb out and do nothing. (Given the fact that this command
+# may be ran as sudo, the directories and files are going to be created with the user "root" and the permissions for
+# files will be non modifiable... thus will need transferring ownership or alerting the user that the ownership is set
+# to a particular setting).
+handle_permissions() {
+    if [ ! -z "$user" ]; then
+        chown -R $user:$user "./websites/$website";
+        echo "step 4: Ownership of the files have been given to the user: [$user:$user] in [./websites/$website]";
+        return;
+    fi
+    echo "step 4: No user specified, ownership will be given to [root:root] in [./websites/$website]";
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -231,6 +282,7 @@ if [ "$action" == "create" ]; then
     handle_create_hosts;
     handle_create_configuration;
     handle_create_website_creation;
+    handle_permissions;
 fi
 
 # if passing the action as remove then the script is going to start running the necessary methods in order to tear down
