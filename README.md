@@ -6,7 +6,8 @@ This is a simplified environment dedicated for getting up and ready with
 website development with ease. Take away the strain of setting up the server
 variables and such with the utilisation of the helper script (__factory.sh__)
 
-To get setup simply clone and run `docker-compose up -d`
+To get started simply `git clone https://github.com/Lillam/webdock.git` 
+and run `docker-compose up -d`
 
 ---
 
@@ -18,6 +19,12 @@ which will generate the following:
 - ./server/sites-available/{website}.conf
 - ./websites/{website}/public/index.php
 - `127.0.0.1 {website].test www.{website}.test` >>> /etc/hosts will be added.
+
+| arguments       | what it does                                           | example                                              |
+|-----------------|--------------------------------------------------------|------------------------------------------------------|
+| website         | Specify the website's name which will be created       | `./factory.sh create portfolio`                      |
+| user            | The user for the new directories permissions           | `./factory.sh create portfolio root`                 |
+| --with-composer | Includes the necessary composer directories and files. | `./factory.sh create portfolio root --with-composer` |
 
 ---
 

@@ -33,7 +33,6 @@ website=$2;
 user=$3;
 with=$4
 
-
 # the host in which when running the script (if creating one) that will be bound to, this *could* potentially be passed
 # as a parameter to make it easier for the script so that the user could run:
 # ./factory.sh create website -host=192.168.0.1
@@ -168,7 +167,9 @@ read -r -d '' composer <<- EOL
             "email": "first.last@provider.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.2"
+    }
 }
 EOL
 
