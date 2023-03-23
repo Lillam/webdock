@@ -11,27 +11,32 @@ and run `docker-compose up -d`
 
 ---
 
+### Creating a website.
+
 To set up a new project you can run the following: (*might need sudo*)
 ```
-./factory.sh create {website}
+./factory create --website:{website}
 ```
 which will generate the following:
 - ./server/sites-available/{website}.conf
 - ./websites/{website}/public/index.php
 - `127.0.0.1 {website].test www.{website}.test` >>> /etc/hosts will be added.
 
-| arguments       | what it does                                           | example                                              |
-|-----------------|--------------------------------------------------------|------------------------------------------------------|
-| website         | Specify the website's name which will be created       | `./factory.sh create portfolio`                      |
-| user            | The user for the new directories permissions           | `./factory.sh create portfolio root`                 |
-| --with-composer | Includes the necessary composer directories and files. | `./factory.sh create portfolio root --with-composer` |
+| Arguments     | Example                                                   |
+|---------------|-----------------------------------------------------------|
+| --website     | `./factory create --website:portfolio`                    |
+| --user        | `./factory create --website:portfolio --user:root`        |
+| --with        | `./factory create --website:portfolio --with:composer`    |
+| --host        | `./factory create --website:portfolio --host:192.168.0.1` |
 
 ---
+
+### Removing a website.
 
 If you decide that you no longer desire that project, or you made a mistake 
 or just simply want to remove it you can run the following: (*might need sudo*)
 ```
-./factory.sh remove {website}
+./factory remove --website:{website}
 ```
 
 which will remove the following:

@@ -28,23 +28,53 @@
 # Script Variables
 #-----------------------------------------------------------------------------------------------------------------------
 
+# the core action which will either be: create|remove; without this, the script will (should) bomb out.
 action=$1;
-website=$2;
-user=$3;
-with=$4
 
-# the host in which when running the script (if creating one) that will be bound to, this *could* potentially be passed
-# as a parameter to make it easier for the script so that the user could run:
-# ./factory.sh create website -host=192.168.0.1
-host=127.0.0.1;
-
-if [ -z "$action" ] || [ -z "$website" ]; then
-    echo "action or website hasn't been provided";
+#
+if [ -z "$action" ]; then
+    echo "An action is required for this script to run, please provide action i.e... ./factory create|remove ...";
     exit;
 fi
 
+#
 if [ "$action" != "create" ] && [ "$action" != "remove" ]; then
     echo "first passed parameter (action) wants to be [create|remove]";
+    exit;
+fi
+
+# website will be defaulted to blank (And if this happens to be blank) then we're going to bomb the script out as
+# a website is a require parameter.
+website="";
+
+# defaulted to root, if the user doesn't pass one in, however this is the user in which the filesystem will be granted
+# permission to (who the created files will belong to).
+user="root";
+
+# right now all this is really going to be supporting is just composer... --with:composer
+with="";
+
+# The default host that the websites will be linked to, this can be overwritten by passing in --host=192.168.0.1 or
+# whatever the developer might prefer.
+host="127.0.0.1";
+
+for arg in "${@}"; do
+    if [[ "$arg" == *"--website:"* ]]; then
+        website=${arg/"--website:"/""};
+    fi
+    if [[ "$arg" == *"--with:"* ]]; then
+        with=${arg/"--with:"/""};
+    fi
+    if [[ "$arg" == *"--user:"* ]]; then
+        user=${arg/"--user:"/""};
+    fi
+    if [[ "$arg" == *"--host:"* ]]; then
+        host=${arg/"--host:"/""};
+    fi
+done
+
+if [ "$website" == "" ]; then
+    echo "A website is needed to be passed in order for this script to work, i.e... ./factory create --website:test";
     exit;
 fi
 
@@ -228,7 +258,7 @@ handle_create_website_creation() {
 # happening, we're then going to want to run the necessary container's directory composer install so that the files
 # will be generated and auto-loading will be in place from the minute the user opens the web page.
 handle_create_composer() {
-    if [[ "$with" == *"--with-composer"* ]]; then
+    if [[ "$with" == *"composer"* ]]; then
         if [ ! -d "./websites/$website/src" ]; then
             mkdir "./websites/$website/src";
         fi

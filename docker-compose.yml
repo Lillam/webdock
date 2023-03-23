@@ -1,7 +1,11 @@
 version: "3.8"
 
 services:
-  # The serve in which the tech stack will be running on. (Nginx)
+
+  #---------------------------------------------------------------------------------------------------------------------
+  # The Server...
+  #---------------------------------------------------------------------------------------------------------------------
+  #
   server:
     build:
       context: ./server
@@ -18,7 +22,10 @@ services:
       - php
       - database
 
-  # The language of choice that this server will be predominantly using.
+  #---------------------------------------------------------------------------------------------------------------------
+  # The Language Processor.
+  #---------------------------------------------------------------------------------------------------------------------
+  #
   php:
     build:
       context: ./php
@@ -31,7 +38,10 @@ services:
     volumes:
       - ./websites:/var/www/html
 
-  # The persistence of data that the environments may or may not need to have.
+  #---------------------------------------------------------------------------------------------------------------------
+  # The Database
+  #---------------------------------------------------------------------------------------------------------------------
+  #
   database:
     image: mysql:5.7.22
     container_name: database
@@ -45,9 +55,11 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - ./database/data:/var/lib/mysql # persisting the data (when the docker containers are destroyed maintain data)
-#      - ./database/my.cnf:/etc/mysql/my.cnf #[my.cnf] -> Configure the mysql database right here.
 
-# The networks that the application will be utilising in order to talk to one another.
+#-----------------------------------------------------------------------------------------------------------------------
+# The Networks of the Docker environment.
+#-----------------------------------------------------------------------------------------------------------------------
+#
 networks:
   internal:
     driver: bridge
