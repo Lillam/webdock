@@ -22,12 +22,14 @@ which will generate the following:
 - ./websites/{website}/public/index.php
 - `127.0.0.1 {website].test www.{website}.test` >>> /etc/hosts will be added.
 
-| Arguments     | Example                                                   |
-|---------------|-----------------------------------------------------------|
-| --website     | `./factory create --website:portfolio`                    |
-| --user        | `./factory create --website:portfolio --user:root`        |
-| --with        | `./factory create --website:portfolio --with:composer`    |
-| --host        | `./factory create --website:portfolio --host:192.168.0.1` |
+| Arguments | Example                                                   |
+|-----------|-----------------------------------------------------------|
+| --website | `./factory create --website:portfolio`                    |
+| --user    | `./factory create --website:portfolio --user:root`        |
+| --with    | `./factory create --website:portfolio --with:composer`    |
+| --host    | `./factory create --website:portfolio --host:192.168.0.1` |
+| --tld     | `./factory create --website:portfolio --tld:org`          |
+| --php     | `./factory create --website:portfolio --php:7.2`          |
 
 ---
 

@@ -3,7 +3,7 @@
 #-----------------------------------------------------------------------------------------------------------------------
 # Script Intro...
 #-----------------------------------------------------------------------------------------------------------------------
-
+#
 # Intro to this particular script
 # This script is designed to make it easier for just setting up the necessary boilerplate stuff that each and every
 # website is going to need... rather than going to each individual location and adding the necessary configurations it
@@ -13,25 +13,81 @@
 # adding the necessary file and folder structure to teh correct appropriate place (for this particular environment)
 # so that you can immediately just hop to creating your website easily.
 #
-# todo: ./factory create:{website name}
-#       is how I want the particular end goal to work here, however right now the command would be
-#       ./factory create {website name} and then you can just go to {website name}.test in your browser without having
-#       to perform anything else yourself.
-#
-# todo: ./factory destroy:{website name}
-#       is how to be able to destroy a particular website that might have been added however no longer wanted...
-#       sudo rm ./server/sites-enabled/{website name}.conf && sudo rm -r ./websites/{website name}
-#
 # This particular method *needs* right now to be ran as sudo (as it touches /etc/hosts).
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Script Variables
 #-----------------------------------------------------------------------------------------------------------------------
-
-# the core action which will either be: create|remove; without this, the script will (should) bomb out.
-action=$1;
-
 #
+# The variables in which the script will be needing in order to fully process, here will be some defaults set in case
+# the developer doesn't pass any in however $action will NEED to be passed to the script otherwise the whole script
+# will just error.
+# variables:
+#   $action  -> (string) -> create|remove -> decide whether you are creating or removing a website.
+#   $website -> (string) -> the name of the website that the developer is going to be want making.
+#   $user    -> (string) -> {user}:{user}|{user} -> to give necessary permissions to the files that are being generated.
+#   $with    -> (string) -> composer,npm -> comma separated list that will tell the script what the developer is
+#                           going to create. package.json, composer.json etc...
+#   $host    -> (string) -> defaulted to 127.0.0.1 (localhost) -> the host in which the website will be served on.
+#   $tld     -> (string) -> defaulted to test however enables the user any extension that they may desire.
+#   $php     -> (string) -> defaulted to 8.2 however the developer will be able to pass one in (however... the container
+#                           will also need updating (./docker-compose.yml).
+
+action=$1;
+website="";
+user="root";
+with="";
+host="127.0.0.1";
+tld="test";
+php="8.2";
+
+for arg in "${@}"; do
+    # if an argument has been passed with website specified then we're going to extract the value of which comes after
+    # and then assign it to the website that will be the name of the website that will be created later in the script.
+    if [[ "$arg" == *"--website:"* ]]; then
+        website=${arg/"--website:"/""};
+    fi
+
+    # If an argument has been passed with "with" then we're going to extract all the values that come after and apply to
+    # the variable $with so that we can check later in the script what will want making. such as
+    # composer.json/package.json etc...
+    if [[ "$arg" == *"--with:"* ]]; then
+        with=${arg/"--with:"/""};
+    fi
+
+    # If an argument has been passed with user, then this will be passed into the user variable, this variable is the
+    # variable that is controlling who the permissions of the generated files will belong to.
+    if [[ "$arg" == *"--user:"* ]]; then
+        user=${arg/"--user:"/""};
+    fi
+
+    # If an argument has been passed with the host, then we're going to extract the data of which comes after the host
+    # and then assign it to the host variable, this will be where the websites are going to be hosted and what server...
+    # i.e.. 127.0.0.1, 192.168.0.1, 0.0.0.0 etc.
+    if [[ "$arg" == *"--host:"* ]]; then
+        host=${arg/"--host:"/""};
+    fi
+
+    # If an argument has been passed with the tld (top level domain) then we're going to extract the data from
+    # everything after tld: and assign it to the variable, which would be either .com, .org, .net, .test; etc...
+    if [[ "$arg" == *"--tld:"* ]]; then
+        tld=${arg/"--tld:"/""};
+    fi
+
+    # If an argument has been passed with the PHP version then we're going to extract it from the argument and apply
+    # it to the variable (overriding the default php 8.2)...
+    if [[ "$arg" == *"--php:"* ]]; then
+        php={arg/"--php:"/""};
+    fi
+done
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Script Validations...
+#-----------------------------------------------------------------------------------------------------------------------
+#
+# Here we are going to be checking whether the script is possible to run or not, checking the necessary variables have
+# been handed to the script... if not then this will need to bomb the script out to avoid errors.
+
 if [ -z "$action" ]; then
     echo "An action is required for this script to run, please provide action i.e... ./factory create|remove ...";
     exit;
@@ -43,36 +99,6 @@ if [ "$action" != "create" ] && [ "$action" != "remove" ]; then
     exit;
 fi
 
-# website will be defaulted to blank (And if this happens to be blank) then we're going to bomb the script out as
-# a website is a require parameter.
-website="";
-
-# defaulted to root, if the user doesn't pass one in, however this is the user in which the filesystem will be granted
-# permission to (who the created files will belong to).
-user="root";
-
-# right now all this is really going to be supporting is just composer... --with:composer
-with="";
-
-# The default host that the websites will be linked to, this can be overwritten by passing in --host=192.168.0.1 or
-# whatever the developer might prefer.
-host="127.0.0.1";
-
-for arg in "${@}"; do
-    if [[ "$arg" == *"--website:"* ]]; then
-        website=${arg/"--website:"/""};
-    fi
-    if [[ "$arg" == *"--with:"* ]]; then
-        with=${arg/"--with:"/""};
-    fi
-    if [[ "$arg" == *"--user:"* ]]; then
-        user=${arg/"--user:"/""};
-    fi
-    if [[ "$arg" == *"--host:"* ]]; then
-        host=${arg/"--host:"/""};
-    fi
-done
-
 if [ "$website" == "" ]; then
     echo "A website is needed to be passed in order for this script to work, i.e... ./factory create --website:test";
     exit;
@@ -80,11 +106,11 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Server Template...
+#-----------------------------------------------------------------------------------------------------------------------
 #
 # boilerplate content for the necessary website that's being created. This would be appended into
 # ./server/sites-enabled/*.conf; which will enable the developer to then start accessing the domain without having to
 # visit localhost
-#-----------------------------------------------------------------------------------------------------------------------
 
 read -r -d '' server <<- EOL
 server {
@@ -112,10 +138,10 @@ EOL
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Website Template...
+#-----------------------------------------------------------------------------------------------------------------------
 #
 # Boilerplate for your website, this is just a basic html snippet appended into the index.php file which would then
 # allow the developer to begin working on the website with ease.
-#-----------------------------------------------------------------------------------------------------------------------
 
 read -r -d '' web_index <<- EOL
 <!DOCTYPE html>
@@ -174,11 +200,11 @@ EOL
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Composer Template...
+#-----------------------------------------------------------------------------------------------------------------------
 #
 # Boilerplate for the composer.json file that will be included with the project if the script has specified that this
 # is going to be wanted. if it is then this will be transferred across and composer install will be initiated from the
 # docker-compose exec php container.
-#-----------------------------------------------------------------------------------------------------------------------
 
 read -r -d '' composer <<- EOL
 {
@@ -198,7 +224,7 @@ read -r -d '' composer <<- EOL
         }
     ],
     "require": {
-        "php": ">=8.2"
+        "php": ">=$php"
     }
 }
 EOL
@@ -217,7 +243,7 @@ handle_create_hosts() {
             return;
         fi
     done <<< $(cat "/etc/hosts");
-    echo "$host ${website}.test www.${website}.test # -> from factory" >> /etc/hosts;
+    echo "$host $website.$tld www.$website.$tld # -> from factory" >> /etc/hosts;
     echo "step 1: /etc/hosts has been updated to accommodate $website onto $host";
 }
 
@@ -267,6 +293,9 @@ handle_create_composer() {
         docker-compose run -w "/var/www/html/$website" php composer install;
         echo "step 3.2 composer has finished installing project";
     fi
+    # todo
+    #   -> Check if the developer has passed in npm
+    #   -> Check if the developer has passed in database
 }
 
 # Utility for handling the permissions to set the user for the one that the person specifies for within the command...
