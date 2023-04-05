@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   #---------------------------------------------------------------------------------------------------------------------
-  # The Server...
+  # The Server... responsible for mapping all http traffic to the necessary containers...
   #---------------------------------------------------------------------------------------------------------------------
   #
   server:
@@ -19,6 +19,7 @@ services:
       - ./websites:/var/www/html
     depends_on:
       - php
+#      - js
       - database
 
   #---------------------------------------------------------------------------------------------------------------------
@@ -36,6 +37,45 @@ services:
       - internal
     volumes:
       - ./websites:/var/www/html
+
+  #---------------------------------------------------------------------------------------------------------------------
+  # JavaScript driven setups (not quite gonna work as intended)
+  #---------------------------------------------------------------------------------------------------------------------
+  #
+  #js:
+  #  container_name: js
+  #  build:
+  #    context: ./js
+  #    dockerfile: Dockerfile
+  #  ports:
+  #    - "3000:3000"
+  #  networks:
+  #    - internal
+  #  volumes:
+  #    - ./websites:/var/www/html
+
+  #---------------------------------------------------------------------------------------------------------------------
+  # Event Handling... SOCKETS BAYBEEE TODO: (Rename this more appropriately)
+  #---------------------------------------------------------------------------------------------------------------------
+  #
+  event:
+    container_name: event
+    image: dunglas/mercure
+    restart: unless-stopped
+    environment:
+      # Uncomment the following line to disable HTTPS
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+      MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+      MERCURE_EXTRA_DIRECTIVES: |-
+        cors_origins *
+    ports:
+      - "8000:80"
+    networks:
+      - internal
+    volumes:
+      - "./events/data:/data"
+      - "./events/config:/config"
 
   #---------------------------------------------------------------------------------------------------------------------
   # The Database

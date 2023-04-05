@@ -10,7 +10,7 @@
 # can be consolidated into this particular helper; which is going to take care of the following:
 # adding the host into the hosts /etc/hosts file
 # adding the necessary server configuration file into nginx where the website is going to be run from
-# adding the necessary file and folder structure to teh correct appropriate place (for this particular environment)
+# adding the necessary file and folder structure to the correct appropriate place (for this particular environment)
 # so that you can immediately just hop to creating your website easily.
 #
 # This particular method *needs* right now to be ran as sudo (as it touches /etc/hosts).
@@ -23,7 +23,7 @@
 # the developer doesn't pass any in however $action will NEED to be passed to the script otherwise the whole script
 # will just error.
 # variables:
-#   $action  -> (string) -> create|remove -> decide whether you are creating or removing a website.
+#   $action  -> (string) -> create|remove -> decide whether you are creating or removing a website
 #   $website -> (string) -> the name of the website that the developer is going to be want making.
 #   $user    -> (string) -> {user}:{user}|{user} -> to give necessary permissions to the files that are being generated.
 #   $with    -> (string) -> composer,npm -> comma separated list that will tell the script what the developer is
@@ -31,7 +31,9 @@
 #   $host    -> (string) -> defaulted to 127.0.0.1 (localhost) -> the host in which the website will be served on.
 #   $tld     -> (string) -> defaulted to test however enables the user any extension that they may desire.
 #   $php     -> (string) -> defaulted to 8.2 however the developer will be able to pass one in (however... the container
-#                           will also need updating (./docker-compose.yml).
+#                           will also need updating (./docker-compose.yml). - this doesn't actually do anything as of
+#                           the moment, which just simply specifies the PHP version inside the composer.json file if
+#                           the user decides that they're making a project with composer.
 
 action=$1;
 website="";
@@ -40,9 +42,10 @@ with="";
 host="127.0.0.1";
 tld="test";
 php="8.2";
+database="";
 
 for arg in "${@}"; do
-    # if an argument has been passed with website specified then we're going to extract the value of which comes after
+    # if an argument has been passed with website. specified then we're going to extract the value of which comes after
     # and then assign it to the website that will be the name of the website that will be created later in the script.
     if [[ "$arg" == *"--website:"* ]]; then
         website=${arg/"--website:"/""};
@@ -78,6 +81,10 @@ for arg in "${@}"; do
     # it to the variable (overriding the default php 8.2)...
     if [[ "$arg" == *"--php:"* ]]; then
         php={arg/"--php:"/""};
+    fi
+
+    if [[ "$arg" == *"--database:"* ]]; then
+        database={arg/"--database:"/""};
     fi
 done
 
@@ -284,18 +291,35 @@ handle_create_website_creation() {
 # happening, we're then going to want to run the necessary container's directory composer install so that the files
 # will be generated and auto-loading will be in place from the minute the user opens the web page.
 handle_create_composer() {
-    if [[ "$with" == *"composer"* ]]; then
-        if [ ! -d "./websites/$website/src" ]; then
-            mkdir "./websites/$website/src";
-        fi
-        echo -e "$composer" >> "./websites/$website/composer.json";
-        echo "step 3.1 composer.json has been added to ./websites/$website";
-        docker-compose run -w "/var/www/html/$website" php composer install;
-        echo "step 3.2 composer has finished installing project";
+    if [[ "$with" != *"composer"* ]]; then
+        return;
     fi
-    # todo
-    #   -> Check if the developer has passed in npm
-    #   -> Check if the developer has passed in database
+
+    if [ ! -d "./websites/$website/src" ]; then
+        mkdir "./websites/$website/src";
+    fi
+
+    # if the composer.json file already exists within the application then we're just going to want to do nothing and
+    # exit on out of this particular piece.
+    if [ ! -f "./websites/$website/composer.json" ]; then
+        echo "step 3.1 composer.json has been added to ./websites/$website";
+        echo -e "$composer" >> "./websites/$website/composer.json";
+    else
+        echo "Step 3.1 composer.json already exists";
+    fi
+
+    docker-compose run -w "/var/www/html/$website" php composer install;
+    echo "step 3.2 composer has finished installing project";
+}
+
+# Utility method for handling the creation of a database; if the developer had specified the argument --database then
+# what was passed will be the name of the database;
+handle_create_database() {
+    if [[ "$database" == "" ]]; then
+        return;
+    fi
+
+    docker-compose exec "database mysql -uroot -proot -e "CREATE DATABASE $database"";
 }
 
 # Utility for handling the permissions to set the user for the one that the person specifies for within the command...
@@ -360,13 +384,14 @@ if [ "$action" == "create" ]; then
     handle_create_website_creation;
     handle_create_composer;
     handle_permissions;
+    handle_create_database;
 fi
 
 # if passing the action as remove then the script is going to start running the necessary methods in order to tear down
 # the particular website that the developer will have passed.
 if [ "$action" == "remove" ]; then
     handle_remove_hosts;
-    handle_remove_website_config
+    handle_remove_website_config;
     handle_remove_website_directory;
 fi
 
