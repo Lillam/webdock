@@ -37,7 +37,7 @@
 
 action=$1;
 website="";
-user="root";
+user=$SUDO_USER;
 with="";
 host="127.0.0.1";
 tld="test";
@@ -59,7 +59,8 @@ for arg in "${@}"; do
     fi
 
     # If an argument has been passed with user, then this will be passed into the user variable, this variable is the
-    # variable that is controlling who the permissions of the generated files will belong to.
+    # variable that is controlling who the permissions of the generated files will belong to. if this variable does not
+    # get passed however; this will simply be the user that had called sudo. $SUDO_USER by default.
     if [[ "$arg" == *"--user:"* ]]; then
         user=${arg/"--user:"/""};
     fi
@@ -100,12 +101,15 @@ if [ -z "$action" ]; then
     exit;
 fi
 
-#
+# if we hadn't passed in an action, "create" or "remove" then we can simply return early from this script; there would
+# be nothing to really do at this point so close the script.
 if [ "$action" != "create" ] && [ "$action" != "remove" ]; then
     echo "first passed parameter (action) wants to be [create|remove]";
     exit;
 fi
 
+# if the website hadn't been passed through then again, we're going to want to return out of this script early there
+# would be no point executing this script when there's no website name to make.
 if [ "$website" == "" ]; then
     echo "A website is needed to be passed in order for this script to work, i.e... ./factory create --website:test";
     exit;
