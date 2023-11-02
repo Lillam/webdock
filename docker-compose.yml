@@ -29,7 +29,7 @@ services:
     container_name: php
     build:
       context: ./php
-      dockerfile: php/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "9000:9000"
     networks:
