@@ -8,14 +8,14 @@ services:
   server:
     container_name: server
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: ./containers/server
+      dockerfile: ./Dockerfile
     ports:
       - "80:80"
     networks:
       - internal
     volumes:
-      - ./server/sites-enabled:/etc/nginx/conf.d
+      - ./containers/server/sites-enabled:/etc/nginx/conf.d
       - ./websites:/var/www/html
     depends_on:
       - php
@@ -28,7 +28,7 @@ services:
   php:
     container_name: php
     build:
-      context: ./php
+      context: ./containers/php
       dockerfile: ./Dockerfile
     ports:
       - "9000:9000"
