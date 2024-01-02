@@ -263,12 +263,12 @@ handle_create_hosts() {
 # php/html based implementation devoid of proxies for frontend application development. however that might be something
 # to consider when running this application -> appending some boilerplate proxy reverses for a frontend stack instead.
 handle_create_configuration() {
-    if [ ! -f "./server/sites-enabled/$website.conf" ]; then
-        echo -e "$server" >> "./server/sites-enabled/${website}.conf";
-        echo "step 2: $website.conf has been created within ./server/sites-enabled/$website.conf";
+    if [ ! -f "./container/server/sites-enabled/$website.conf" ]; then
+        echo -e "$server" >> "./container/server/sites-enabled/${website}.conf";
+        echo "step 2: $website.conf has been created within ./container/server/sites-enabled/$website.conf";
         return;
     fi
-    echo "step 2: $website.conf already existed within ./server/sites-enabled/$website.conf";
+    echo "step 2: $website.conf already existed within ./container/server/sites-enabled/$website.conf";
 }
 
 # Utility method for handling the creation of the website, when hitting this part; within the environment we are going

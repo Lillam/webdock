@@ -5,8 +5,8 @@ websites/*
 
 # Ignore all the configurations that the factory might have made for you; or just generally any configuration other than
 # the default that has been provided for example.
-server/sites-enabled/*
-!server/sites-enabled/default.conf
+containers/server/sites-enabled/*
+!containers/server/sites-enabled/default.conf
 
 database/*
 !database/my.cnf
