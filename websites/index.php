@@ -98,7 +98,7 @@
             .commands .command {
                 margin-left: 0;
                 width: 100%;
-            }
+ scrollb           }
 
             .commands .command p {
                 margin: 0;
@@ -108,6 +108,12 @@
                 width: 100%;
                 max-height: 100%;
                 overflow-y: scroll;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .websiteList::-webkit-scrollbar {
+                display: none;
             }
 
             .websiteList a {
