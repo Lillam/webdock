@@ -45,7 +45,7 @@
             .main > div {
                 height: 100%;
                 padding: 40px 60px;
-                width: 33.333%;
+                width: 100%;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -142,15 +142,17 @@
                     <p>This environment had been created specifically to help quickly get off the ground with web development, providing a script that will essentially take care of everything for you so you can put some concepts out of mind.</p>
                 </div>
             </div>
-            <div>
-                <div class="websiteList">
-                    <h2>Websites <span>Available</span>:</h2>
-                    <p>All of the websites that are currently installed within this environment can be found here, clicking on the links below will take you to the respective environment.</p>
-                    <?php foreach ($websites as $website): ?>
-                        <a href="http://www.<?= $website; ?>.test" target="_blank"><?= $website; ?></a>
-                    <?php endforeach; ?>
+            <?php if (count($websites) > 0) { ?>
+                <div>
+                    <div class="websiteList">
+                        <h2>Websites <span>Available</span>:</h2>
+                        <p>All of the websites that are currently installed within this environment can be found here, clicking on the links below will take you to the respective environment.</p>
+                        <?php foreach ($websites as $website): ?>
+                            <a href="http://www.<?= $website; ?>.test" target="_blank"><?= $website; ?></a>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
+            <?php } ?>
             <div class="commands flex">
                 <div class="commandList">
                     <h2>Commands <span>Available</span>:</h2>
